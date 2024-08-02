@@ -3,9 +3,22 @@
   <arg name="world_name" default="empty_world"/>
   <arg name="gazebo_gui" default="true"/>
 
+  <arg name="lidar_offset_x" default="0.0"/>
+  <arg name="lidar_offset_y" default="0.0"/>
+  <arg name="lidar_offset_z" default="-0.6685"/>
+  <arg name="lidar_offset_roll" default="0"/>
+  <arg name="lidar_offset_pitch" default="0.0"/>
+  <arg name="lidar_offset_yaw" default="0.0"/>
+
   <include file="$(find nexplore_gz_simulator)/launch/vehicle_simulator.launch" >
     <arg name="world_name" value="$(arg world_name)"/>
     <arg name="gazebo_gui" value="$(arg gazebo_gui)"/>
+    <arg name="lidar_offset_x" value="$(arg lidar_offset_x)" />
+    <arg name="lidar_offset_y" value="$(arg lidar_offset_y)" />
+    <arg name="lidar_offset_z" value="$(arg lidar_offset_z)" />
+    <arg name="lidar_offset_roll" value="$(arg lidar_offset_roll)" />
+    <arg name="lidar_offset_pitch" value="$(arg lidar_offset_pitch)" />
+    <arg name="lidar_offset_yaw" value="$(arg lidar_offset_yaw)" />
   </include>
 
   <node launch-prefix="nice" pkg="rviz" type="rviz" name="rvizGA" args="-d $(find nexplore_gz_simulator)/rviz/rviz.rviz" respawn="true"/>

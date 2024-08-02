@@ -45,6 +45,13 @@ private:
   sensor_msgs::PointCloud2::ConstPtr pcd_;
   gazebo_msgs::ModelState lidarState;
 
+  float lidar_offset_x_ = 0;
+  float lidar_offset_y_ = 0;
+  float lidar_offset_z_ = 0;
+  float lidar_offset_roll_ = 0;
+  float lidar_offset_pitch_ = 0;
+  float lidar_offset_yaw_ = 0;
+
   float lidar_x_;
   float lidar_y_;
   float lidar_z_;

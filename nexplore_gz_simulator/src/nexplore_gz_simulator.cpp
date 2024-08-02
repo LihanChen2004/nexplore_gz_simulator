@@ -19,6 +19,19 @@ NexploreGZSimulator::NexploreGZSimulator()
 
   timer_ = nh_.createTimer(ros::Duration(0.01), &NexploreGZSimulator::modelUpdate, this);
 
+  nh_private_.getParam("lidar_offset_x", lidar_offset_x_);
+  nh_private_.getParam("lidar_offset_y", lidar_offset_y_);
+  nh_private_.getParam("lidar_offset_z", lidar_offset_z_);
+  nh_private_.getParam("lidar_offset_roll", lidar_offset_roll_);
+  nh_private_.getParam("lidar_offset_pitch", lidar_offset_pitch_);
+  nh_private_.getParam("lidar_offset_yaw", lidar_offset_yaw_);
+  ROS_INFO("Set lidar_offset_x to: %f", lidar_offset_x_);
+  ROS_INFO("Set lidar_offset_y to: %f", lidar_offset_y_);
+  ROS_INFO("Set lidar_offset_z to: %f", lidar_offset_z_);
+  ROS_INFO("Set lidar_offset_roll to: %f", lidar_offset_roll_);
+  ROS_INFO("Set lidar_offset_pitch to: %f", lidar_offset_pitch_);
+  ROS_INFO("Set lidar_offset_yaw to: %f", lidar_offset_yaw_);
+
   nexplore::GetDatasetConfig srv;
   ros::service::waitForService("/get_dataset_config");
   if (get_dataset_client_.call(srv)) {
@@ -93,24 +106,28 @@ bool NexploreGZSimulator::getPointCloudCallback(
   poseInNexplore.pose = req.pose.pose;
   tf2::doTransform(poseInNexplore, poseInGazebo, transformStamped);
 
-  // Get roll, pitch, yaw from quaternion
-  const tf2::Quaternion quat(
-    poseInGazebo.pose.orientation.x, poseInGazebo.pose.orientation.y,
-    poseInGazebo.pose.orientation.z, poseInGazebo.pose.orientation.w);
-  double roll, pitch, yaw;
-  tf2::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+  tf2::Quaternion temp_quat;
+  tf2::fromMsg(poseInGazebo.pose.orientation, temp_quat);
 
+  // Rotate lidar frame to match ros axis
   tf2::Quaternion q1, q2, rotatedQuat;
   q1.setRPY(-M_PI / 2, 0, 0);
   q2.setRPY(0, 0, M_PI / 2);
-  rotatedQuat = quat * q1 * q2;
+  rotatedQuat = temp_quat * q1 * q2;
+
+  // Set LiDAR offset pose, based on camera pose from nexplore
+  poseInGazebo.pose.position.x += lidar_offset_x_;
+  poseInGazebo.pose.position.y += lidar_offset_y_;
+  poseInGazebo.pose.position.z += lidar_offset_z_;
+  tf2::Quaternion offsetQuat;
+  offsetQuat.setRPY(lidar_offset_roll_, lidar_offset_pitch_, lidar_offset_yaw_);
+  rotatedQuat *= offsetQuat;
 
   // Update LiDAR model in gazebo
   lidar_x_ = poseInGazebo.pose.position.x;
   lidar_y_ = poseInGazebo.pose.position.y;
   lidar_z_ = poseInGazebo.pose.position.z;
   lidar_quat_ = tf2::toMsg(rotatedQuat);
-  ROS_DEBUG("Receive Lidar pose: x=%f, y=%f, z=%f", lidar_x_, lidar_y_, lidar_z_);
 
   lidarState.model_name = "lidar";
   lidarState.pose.orientation = lidar_quat_;
@@ -118,9 +135,6 @@ bool NexploreGZSimulator::getPointCloudCallback(
   lidarState.pose.position.y = lidar_y_;
   lidarState.pose.position.z = lidar_z_;
   model_state_pub_.publish(lidarState);
-  ROS_DEBUG(
-    "model_state_pub_: x=%f, y=%f, z=%f", lidarState.pose.position.x, lidarState.pose.position.y,
-    lidarState.pose.position.z);
 
   // Wait for point cloud to update
   wait_for_pcd_ = true;

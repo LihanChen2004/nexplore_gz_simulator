@@ -8,6 +8,13 @@
   <arg name="verbose" default="false"/>
   <arg name="world_name" default="empty_world"/>
 
+  <arg name="lidar_offset_x" default="0.0"/>
+  <arg name="lidar_offset_y" default="0.0"/>
+  <arg name="lidar_offset_z" default="0.0"/>
+  <arg name="lidar_offset_roll" default="0.0"/>
+  <arg name="lidar_offset_pitch" default="0.0"/>
+  <arg name="lidar_offset_yaw" default="0.0"/>
+
   <include file="$(find gazebo_ros)/launch/empty_world.launch" >
     <arg name="paused" value="$(arg paused)"/>
     <arg name="use_sim_time" value="$(arg use_sim_time)"/>
@@ -22,6 +29,12 @@
   <node pkg="gazebo_ros" type="spawn_model" name="spawn_lidar" args="-urdf -param /lidar_description -model lidar -x 0 -y 0 -z 0.3"/>
 
   <node pkg="nexplore_gz_simulator" type="nexplore_gz_simulator" name="nexplore_gz_simulator" output="screen" required="true">
+    <param name="lidar_offset_x" value="$(arg lidar_offset_x)" />
+    <param name="lidar_offset_y" value="$(arg lidar_offset_y)" />
+    <param name="lidar_offset_z" value="$(arg lidar_offset_z)" />
+    <param name="lidar_offset_roll" value="$(arg lidar_offset_roll)" />
+    <param name="lidar_offset_pitch" value="$(arg lidar_offset_pitch)" />
+    <param name="lidar_offset_yaw" value="$(arg lidar_offset_yaw)" />
   </node>
 
 </launch>
