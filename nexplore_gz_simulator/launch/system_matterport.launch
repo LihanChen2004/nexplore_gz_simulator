@@ -1,0 +1,13 @@
+<launch>
+
+  <arg name="world_name" default="empty_world"/>
+  <arg name="gazebo_gui" default="true"/>
+
+  <include file="$(find nexplore_gz_simulator)/launch/vehicle_simulator.launch" >
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="gazebo_gui" value="$(arg gazebo_gui)"/>
+  </include>
+
+  <node launch-prefix="nice" pkg="rviz" type="rviz" name="rvizGA" args="-d $(find nexplore_gz_simulator)/rviz/rviz.rviz" respawn="true"/>
+
+</launch>
