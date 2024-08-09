@@ -44,6 +44,7 @@ private:
 
   sensor_msgs::PointCloud2::ConstPtr pcd_;
   gazebo_msgs::ModelState lidarState;
+  ros::Time request_pcd_time_;
 
   float lidar_offset_x_ = 0;
   float lidar_offset_y_ = 0;

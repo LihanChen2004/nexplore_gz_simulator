@@ -77,7 +77,7 @@ void NexploreGZSimulator::scanHandler(const sensor_msgs::PointCloud2::ConstPtr &
 {
   std::lock_guard<std::mutex> lock(mtx_);
   pcd_ = scanIn;
-  if (wait_for_pcd_) {
+  if (wait_for_pcd_ & (scanIn->header.stamp > request_pcd_time_)) {
     pcd_updated_ = true;
     cv_.notify_all();
     ROS_DEBUG("Point cloud updated and notified");
@@ -89,6 +89,8 @@ bool NexploreGZSimulator::getPointCloudCallback(
   nexplore_gz_simulator::GetPointCloud::Response & res)
 {
   std::unique_lock<std::mutex> lock(mtx_);
+
+  request_pcd_time_ = req.pose.header.stamp;
 
   // Get transform from world_gazebo to world_nexplore
   geometry_msgs::TransformStamped transformStamped;
